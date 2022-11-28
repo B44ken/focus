@@ -1,38 +1,54 @@
-.App {
-  text-align: center;
+body {
+    text-align: center;
+    font-size: 22px;
+    font-family: 'Segoe UI', Tahoma, Geneva, sans-serif;
+    margin: 0px;
+    overflow: hidden;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+a {
+    color: darkgrey;
+    text-decoration: underline;
+    cursor: pointer;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.calendar-header {
+    user-select: none;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+.calendar-header * {
+    display: inline-block;
+    width: 40%;
 }
 
-.App-link {
-  color: #61dafb;
+.calendar-header a {
+    width: 30%;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.calendar-body {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-gap: 8px;
+    padding: 8px;
+}
+
+.calendar-day {
+    border-radius: 100%;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+button {
+    color: black;
+    border-radius: 4px;
+    font-size: inherit;
+    padding: 4px 8px;
+    margin: 0px 2px;
+}
+
+main {
+    max-width: 400px;
 }
