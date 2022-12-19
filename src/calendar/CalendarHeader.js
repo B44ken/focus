@@ -5,8 +5,8 @@ export const CalendarHeader = ({ date, addMonth }) => {
 
     const year = date.format('YYYY')
     return <div className="calendar-header">
-        <a onClick={addMonth(-1)}> { monthPrev } </a>
-        <span> { month } </span>
-        <a onClick={addMonth(1)}> { monthNext } </a>
+        <a onClick={addMonth(-1)}> {monthPrev} </a>
+        <span> {month} </span>
+        <a onClick={addMonth(1)}> {monthNext} </a>
     </div>
 }

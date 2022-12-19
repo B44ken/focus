@@ -4,7 +4,7 @@ const dailyGoal = 120 * 60
 
 export const TimePanel = () => {
     const [timeToday, setTimeToday] = useState(0)
-    const [timeLeft, setTimeLeft] = useState(0) 
+    const [timeLeft, setTimeLeft] = useState(0)
     const [running, setRunning] = useState(false)
 
     const addTimeLeft = n => {
@@ -19,11 +19,11 @@ export const TimePanel = () => {
     useEffect(() => {
         const int = setInterval(() => {
 
-            if(timeLeft > 0 && running) {
+            if (timeLeft > 0 && running) {
                 setTimeToday(timeToday + 1)
                 setTimeLeft(timeLeft - 1)
             }
-            if(timeLeft == 0) {
+            if (timeLeft === 0) {
                 setRunning(false)
             }
         }, 1000)
@@ -34,11 +34,11 @@ export const TimePanel = () => {
     return <div className="time-panel">
         {minutes(timeToday)} / {minutes(dailyGoal)} min
         <br />
-        <button onClick={ () => addTimeLeft(-15 * 60) }>-</button>
-        { minutes(timeLeft) } min { seconds(timeLeft) } s
-        <button onClick={ () => addTimeLeft(15 * 60) }>+</button>
-        <button onClick={ () => setRunning(!running) }>
-            { running ? 'stop' : 'start' }
+        <button onClick={() => addTimeLeft(-15 * 60)}>-</button>
+        {minutes(timeLeft)} min {seconds(timeLeft)} s
+        <button onClick={() => addTimeLeft(15 * 60)}>+</button>
+        <button onClick={() => setRunning(!running)}>
+            {running ? 'stop' : 'start'}
         </button>
     </div>
 }

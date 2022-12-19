@@ -1,24 +1,26 @@
-import { queryDay } from '../time/store.js'
-import moment from 'moment'
+import { useEffect, useState } from 'react'
 
-const CalendarDay = ({ day }) => {
-    const { goal, time } = queryDay(day)
-    let colour = 'green'
-    if(day >= moment().startOf('day')) colour = 'grey'
-    else if(time < goal) colour = '#f73c1d'
+const CalendarDay = ({ day, user }) => {
 
-    return <div className='calendar-day' style = { { backgroundColor: colour } }>
-        <div>{ day.format('D') }</div>
+    const [color, setColor] = useState('lightgrey')
+
+    useEffect(() => {
+        const dayData = user.readDay(day.format('YYYY-MM-DD'))
+        if(dayData.done >= dayData.goal) setColor('lightgreen')
+        else setColor('lightcoral')
+    })
+
+
+    return <div className='calendar-day' style={{ backgroundColor: color }}>
+        <div>{day.format('D')}</div>
     </div>
-    // return <div className="calendar-day"> { date } ! </div>
 }
 
-export const CalendarBody = ({ date }) => {
+export const CalendarBody = ({ date, user }) => {
     const dayElements = []
-    for(let i = 0; i < date.daysInMonth(); i++) {
+    for (let i = 0; i < date.daysInMonth(); i++) {
         const day = date.clone().add(i, 'day')
-        dayElements.push(<CalendarDay day={day} key={i} />)
+        dayElements.push(<CalendarDay day={day} key={day.format("YYYY-MM-DD")} user={user} />)
     }
-
-    return <div className="calendar-body"> { dayElements } </div>
+    return <div className="calendar-body"> {dayElements} </div>
 }
