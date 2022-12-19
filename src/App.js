@@ -11,7 +11,7 @@ export default () => {
 
     return <main>
         <Account user={user} setUser={setUser} />
-        <TimePanel user={user} setUser={setUser} />
-        <Calendar user={user} setUser={setUser} />
+        <TimePanel user={user} />
+        <Calendar user={user} />
     </main>
 }

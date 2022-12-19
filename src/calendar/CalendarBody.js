@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import moment from 'moment'
+
 
 const CalendarDay = ({ day, user }) => {
 
@@ -7,6 +9,7 @@ const CalendarDay = ({ day, user }) => {
     useEffect(() => {
         const dayData = user.readDay(day.format('YYYY-MM-DD'))
         if(dayData.done >= dayData.goal) setColor('lightgreen')
+        else if(day.isAfter(moment())) setColor('lightgrey')
         else setColor('lightcoral')
     })
 
