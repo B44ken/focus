@@ -1,16 +1,17 @@
-import userEvent from '@testing-library/user-event'
 import { useEffect, useState } from 'react'
 import moment from 'moment'
-
-const dailyGoal = 120 * 60
 
 export const TimePanel = ({ user }) => {
     const [timeToday, setTimeToday] = useState(0)
     const [timeLeft, setTimeLeft] = useState(0)
     const [running, setRunning] = useState(false)
     const [lastTick, setLastTick] = useState(Date.now())
-
+    const [goalToday, setGoalToday] = useState(60)
+    
     const today = moment().format('YYYY-MM-DD')
+
+    const minutes = s => Math.floor(s / 60)
+    const seconds = s => Math.ceil(s % 60)
 
     const addTimeLeft = n => {
         let set = Math.max(timeLeft + n, 0)
@@ -18,30 +19,39 @@ export const TimePanel = ({ user }) => {
         setTimeLeft(set)
     }
 
-    const minutes = seconds => Math.floor(seconds / 60)
-    const seconds = seconds => Math.floor(seconds % 60)
+    useEffect(() => {
+        const day = user.readDay(today)
+        setTimeToday(day.done * 60)
+        setGoalToday(day.goal * 60)
+    })
 
     useEffect(() => {
         const int = setInterval(() => {
-            if (timeLeft > 0 && running) {
-                const delta = (Date.now() - lastTick) / 1000
-                setTimeToday(timeToday + delta)
-                setTimeLeft(timeLeft - delta)
-
-                if(timeToday % 60 <= 1)
-                    user.writeDay(today, minutes(timeToday))
-            }
-            if (timeLeft === 0)
+            if(!running)
+            setLastTick(Date.now())
+            
+            if(timeLeft === 0)
                 setRunning(false)
 
-            setLastTick(Date.now())
+            if(timeLeft > 0 && running) {
+                const delta = (Date.now() - lastTick) / 1000
+                setTimeLeft(timeLeft - delta)
+                setLastTick(Date.now())
+                
+                const dbDay = user.readDay(today)
+                const dbSecondsDone = dbDay.done * 60
+                setTimeToday(Math.max(timeToday, dbSecondsDone) + delta)
+
+                user.writeDay(today, minutes(timeToday))
+            }
+                
         }, 1000)
 
         return () => clearInterval(int)
-    }, [timeLeft, timeToday, running])
+    }, [user, timeLeft, lastTick, running, timeToday, today])
 
     return <div className="time-panel">
-        {minutes(timeToday)} / {minutes(dailyGoal)} min
+        {minutes(timeToday)} / {minutes(goalToday)} min
         <br />
         <button onClick={() => addTimeLeft(-15 * 60)}>-</button>
         {minutes(timeLeft)} min {seconds(timeLeft)} s

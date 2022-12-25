@@ -1,18 +1,12 @@
-
 import { useEffect, useState } from 'react'
 
 export const Account = ({ user, setUser }) => {
-    const [loggedIn, setLoggedIn] = useState(null)
+    const [loggedIn, setLoggedIn] = useState(false)
 
     useEffect(() => {
-        user.mountUI('.login-button')
-    }, [])
-
-
-    // god knows why setInterval is necessary
-    setInterval(() => {
-        if(user.id) setLoggedIn(user.id)
-    }, 100)
+        user.mountUI('.login-button', setUser)
+        setLoggedIn(user.user?.uid != null)
+    }, [user, setUser])
 
     const logout = () => {
         user.logout()
@@ -28,7 +22,9 @@ export const Account = ({ user, setUser }) => {
         <div className="logged-in" style={{
             display: loggedIn ? 'block' : 'none'
         }}>
-            logged in as: {user.user?.email || 'nobody'} (<a href="#" onClick={logout}>logout</a>)
+            logged in as: <br /> 
+            {user.user?.email || 'nobody'} <br />
+            (<a href="#" onClick={logout}>logout</a>)
         </div>
     </div>
 }

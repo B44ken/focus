@@ -7,11 +7,21 @@ const CalendarDay = ({ day, user }) => {
     const [color, setColor] = useState('lightgrey')
 
     useEffect(() => {
+        if(!user.readDay) return
+
         const dayData = user.readDay(day.format('YYYY-MM-DD'))
-        if(dayData.done >= dayData.goal) setColor('lightgreen')
-        else if(day.isAfter(moment())) setColor('lightgrey')
-        else setColor('lightcoral')
-    })
+        const yesterday = moment().subtract(1, 'day')
+
+        if(dayData.done >= dayData.goal)
+            setColor('lightgreen')
+
+        else if(day.isAfter(yesterday))
+            setColor('lightgrey')
+            
+        else
+            setColor('lightcoral')
+        
+    }, [day, user])
 
 
     return <div className='calendar-day' style={{ backgroundColor: color }}>

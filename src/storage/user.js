@@ -1,34 +1,30 @@
 import 'firebaseui/dist/firebaseui.css'
 import firebase from 'firebase/compat/app'
-import { auth } from 'firebaseui'
-import { getDatabase, ref, set, get, connectDatabaseEmulator } from 'firebase/database'
+import { getDatabase, ref, set, get } from 'firebase/database'
 
 export class FirebaseUser {
-    constructor() {
+    constructor(ui) {
         this.user = null
         this.id = null
         this.userData = {}
         this.defaultGoal = 60
-        firebase.initializeApp({
-            apiKey: "AIzaSyClROcctTLva8nMlP7R-AzuueGiz_9U8J8",
-            authDomain: "focus-d94c9.firebaseapp.com",
-            databaseURL: "https://focus-d94c9-default-rtdb.firebaseio.com",
-            projectId: "focus-d94c9",
-            storageBucket: "focus-d94c9.appspot.com",
-            messagingSenderId: "204472118325",
-            appId: "1:204472118325:web:c32bf0ffc0c31c55f2d57c",
-            measurementId: "G-1P61N0LJG3",
-        })
         this.db = getDatabase()
-        this.ui = new auth.AuthUI(firebase.auth())
+        this.ui = ui
+        this.uiStarted = false
     }
 
-    async mountUI(element) {
+    mountUI(element, setUser) {
         const tryMount = () => {
             try {
                 this.ui.start(element, {
                     signInOptions: [firebase.auth.GoogleAuthProvider.PROVIDER_ID],
-                    callbacks: { signInSuccessWithAuthResult: () => false }
+                    callbacks: {
+                        signInSuccessWithAuthResult: result => {
+                            const newUser = this
+                            newUser.user = result.user
+                            setUser(newUser)
+                        }
+                    }
                 })
                 return true
             } catch (err) { return false }
@@ -85,15 +81,17 @@ export class FirebaseUser {
     }
 
     async writeDay(moment, minutes) {
-        if(!this.user.user.uid) return false
+        if(!this.user?.uid) return false
 
         const [year, month, day] = moment.split('-')
         if(!this.userData[year]) this.userData[year] = {}
         if(!this.userData[year][month]) this.userData[year][month] = {}
+
         this.userData[year][month][day] = {
             done: minutes,
             goal: this.defaultGoal
         }
         await this.write(this.user.uid, this.userData)
+
     }
 }
