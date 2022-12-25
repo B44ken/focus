@@ -11,7 +11,7 @@ export const TimePanel = ({ user }) => {
     const today = moment().format('YYYY-MM-DD')
 
     const minutes = s => Math.floor(s / 60)
-    const seconds = s => Math.ceil(s % 60)
+    const seconds = s => Math.floor(s % 60)
 
     const addTimeLeft = n => {
         let set = Math.max(timeLeft + n, 0)
@@ -20,31 +20,29 @@ export const TimePanel = ({ user }) => {
     }
 
     useEffect(() => {
-        const day = user.readDay(today)
-        setTimeToday(day.done * 60)
-        setGoalToday(day.goal * 60)
-    })
-
-    useEffect(() => {
         const int = setInterval(() => {
-            if(!running)
-            setLastTick(Date.now())
-            
-            if(timeLeft === 0)
-                setRunning(false)
-
             if(timeLeft > 0 && running) {
                 const delta = (Date.now() - lastTick) / 1000
                 setTimeLeft(timeLeft - delta)
                 setLastTick(Date.now())
                 
                 const dbDay = user.readDay(today)
+                setGoalToday(dbDay.goal * 60)
                 const dbSecondsDone = dbDay.done * 60
-                setTimeToday(Math.max(timeToday, dbSecondsDone) + delta)
+
+                if(dbSecondsDone > timeToday)
+                    setTimeToday(dbSecondsDone + delta)
+                else
+                    setTimeToday(timeToday + delta)
 
                 user.writeDay(today, minutes(timeToday))
             }
-                
+            
+            if(timeLeft === 0)
+                setRunning(false)
+            
+            if(!running)
+                setLastTick(Date.now())
         }, 1000)
 
         return () => clearInterval(int)
