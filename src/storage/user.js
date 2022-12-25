@@ -45,9 +45,9 @@ export class FirebaseUser {
         const mountInt = setInterval(() => {
             if (tryMount()) {
                 clearInterval(mountInt)
-                window.user = this;
+                window.user = this
             }
-        }, 50)
+        }, 100)
     }
 
     logout() {
