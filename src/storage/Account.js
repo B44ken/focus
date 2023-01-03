@@ -8,7 +8,7 @@ export const Account = ({ user, setUser }) => {
     }, [])
 
     if(user.loggedIn)
-        return <a onClick={() => user.logout(setUser) }>log out</a>
+        return <a onClick={() => user.logout(setUser)}>log out</a>
 
     return <a onClick={() => user.authLogin(setUser)}>log in</a>
 }

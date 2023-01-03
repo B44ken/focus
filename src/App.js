@@ -11,10 +11,9 @@ import 'firebaseui/dist/firebaseui.css'
 const App = () => {
     const [user, setUser] = useState(new FirebaseUser())
     const [status, setStatus] = useState('Loading...')
-    const [loading, setLoading] = useState(true)
 
     return <main>
-        <title>{ status }</title>
+        <title>{status}</title>
         <Account user={user} setUser={setUser} />
         <TimePanel user={user} setStatus={setStatus} />
         <Calendar user={user} key="Calendar" />

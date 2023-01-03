@@ -7,8 +7,16 @@ export const TimePanel = ({ user }) => {
     const [running, setRunning] = useState(false)
     const [lastTick, setLastTick] = useState(Date.now())
     const [goalToday, setGoalToday] = useState(60)
-    
+
     const today = moment().format('YYYY-MM-DD')
+
+    useEffect(() => {
+        if(user.loggedIn) {
+            const dbDay = user.readDay(today)
+            setGoalToday(dbDay.goal * 60)
+            setTimeToday(dbDay.done * 60)
+        }
+    }, [user.loggedIn])
 
     const minutes = s => Math.floor(s / 60)
     const seconds = s => Math.floor(s % 60)
@@ -39,17 +47,15 @@ export const TimePanel = ({ user }) => {
     useEffect(() => {
         
         const int = setInterval(() => {
-            if(timeLeft >= 0 && running)
+            if(timeLeft >= 0 && running) {
                 doTick()
-            
-            if(timeLeft < 0) {
+            } else if(running) {
                 setTimeLeft(0)
                 doTick()
                 setRunning(false)
-            }
-            
-            if(!running)
+            } else {
                 setLastTick(Date.now())
+            }
         }, 1000)
 
         return () => clearInterval(int)

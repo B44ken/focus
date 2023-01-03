@@ -83,7 +83,7 @@ export class FirebaseUser {
     }
 
     async writeDay(moment, minutes) {
-        if(!auth.loggedIn) return false
+        if(!this.loggedIn) return false
 
         const [year, month, day] = moment.split('-')
         if(!this.userData[year]) this.userData[year] = {}
@@ -91,8 +91,10 @@ export class FirebaseUser {
 
         this.userData[year][month][day] = {
             done: minutes,
-            goal: this.userData.defaultGoa
+            goal: this.userData.defaultGoal
         }
+
+
         await this.write(auth.currentUser.uid, this.userData)
     }
 }
