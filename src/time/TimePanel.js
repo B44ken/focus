@@ -19,27 +19,34 @@ export const TimePanel = ({ user }) => {
         setTimeLeft(set)
     }
 
+    const doTick = () => {
+        const delta = (Date.now() - lastTick) / 1000
+        setTimeLeft(timeLeft - delta)
+        setLastTick(Date.now())
+        
+        const dbDay = user.readDay(today)
+        setGoalToday(dbDay.goal * 60)
+        const dbSecondsDone = dbDay.done * 60
+
+        if(dbSecondsDone > timeToday)
+            setTimeToday(dbSecondsDone + delta)
+        else
+            setTimeToday(timeToday + delta)
+
+        user.writeDay(today, minutes(timeToday))
+    }
+
     useEffect(() => {
+        
         const int = setInterval(() => {
-            if(timeLeft > 0 && running) {
-                const delta = (Date.now() - lastTick) / 1000
-                setTimeLeft(timeLeft - delta)
-                setLastTick(Date.now())
-                
-                const dbDay = user.readDay(today)
-                setGoalToday(dbDay.goal * 60)
-                const dbSecondsDone = dbDay.done * 60
-
-                if(dbSecondsDone > timeToday)
-                    setTimeToday(dbSecondsDone + delta)
-                else
-                    setTimeToday(timeToday + delta)
-
-                user.writeDay(today, minutes(timeToday))
-            }
+            if(timeLeft >= 0 && running)
+                doTick()
             
-            if(timeLeft === 0)
+            if(timeLeft < 0) {
+                setTimeLeft(0)
+                doTick()
                 setRunning(false)
+            }
             
             if(!running)
                 setLastTick(Date.now())

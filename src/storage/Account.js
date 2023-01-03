@@ -1,30 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 
 export const Account = ({ user, setUser }) => {
-    const [loggedIn, setLoggedIn] = useState(false)
-
     useEffect(() => {
-        user.mountUI('.login-button', setUser)
-        setLoggedIn(user.user?.uid != null)
-    }, [user, setUser])
+        setTimeout(() => 
+            user.login(setUser)
+        , 500)
+    }, [])
 
-    const logout = () => {
-        user.logout()
-        setLoggedIn(null)
-        user.mountUI('.login-button')
-    }
-    
-    return <div>
-        <div className="login-button" style={{
-            display: loggedIn ? 'none' : 'block'
-        }}>
-        </div>
-        <div className="logged-in" style={{
-            display: loggedIn ? 'block' : 'none'
-        }}>
-            logged in as: <br /> 
-            {user.user?.email || 'nobody'} <br />
-            (<a href="#" onClick={logout}>logout</a>)
-        </div>
-    </div>
+    if(user.loggedIn)
+        return <a onClick={() => user.logout(setUser) }>log out</a>
+
+    return <a onClick={() => user.authLogin(setUser)}>log in</a>
 }

@@ -1,0 +1,4 @@
+- db sync is 1s out of date
+- local data doesn't clear on new day
+- login jank
+- no way to change goal
