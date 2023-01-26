@@ -18,8 +18,8 @@ export const TimePanel = ({ user }) => {
         }
     }, [user.loggedIn])
 
-    const minutes = s => Math.floor(s / 60)
-    const seconds = s => Math.floor(s % 60)
+    const minutes = s => Math.max(0, Math.floor(s / 60))
+    const seconds = s => Math.ceil(s % 60)
 
     const addTimeLeft = n => {
         let set = Math.max(timeLeft + n, 0)
@@ -45,18 +45,15 @@ export const TimePanel = ({ user }) => {
     }
 
     useEffect(() => {
-        
         const int = setInterval(() => {
-            if(timeLeft >= 0 && running) {
-                doTick()
-            } else if(running) {
-                setTimeLeft(0)
-                doTick()
+            if(running) doTick()
+            else setLastTick(Date.now())
+            
+            if(timeLeft < 0) {
                 setRunning(false)
-            } else {
-                setLastTick(Date.now())
+                setTimeLeft(0)
             }
-        }, 1000)
+        }, 500)
 
         return () => clearInterval(int)
     }, [user, timeLeft, lastTick, running, timeToday, today])
@@ -67,6 +64,7 @@ export const TimePanel = ({ user }) => {
         <button onClick={() => addTimeLeft(-15 * 60)}>-</button>
         {minutes(timeLeft)} min {seconds(timeLeft)} s
         <button onClick={() => addTimeLeft(15 * 60)}>+</button>
+        <button onClick={() => addTimeLeft(15)}>.</button>
         <button onClick={() => setRunning(!running)}>
             {running ? 'stop' : 'start'}
         </button>
