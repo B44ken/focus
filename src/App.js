@@ -10,7 +10,7 @@ import 'firebaseui/dist/firebaseui.css'
 
 const App = () => {
     const [user, setUser] = useState(new FirebaseUser())
-    const [status, setStatus] = useState('Loading...')
+    const [status, setStatus] = useState('focus')
 
     return <main>
         <title>{status}</title>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import moment from 'moment'
 
-export const TimePanel = ({ user }) => {
+export const TimePanel = ({ user, setStatus }) => {
     const [timeToday, setTimeToday] = useState(0)
     const [timeLeft, setTimeLeft] = useState(0)
     const [running, setRunning] = useState(false)
@@ -19,7 +19,7 @@ export const TimePanel = ({ user }) => {
     }, [user.loggedIn])
 
     const minutes = s => Math.max(0, Math.floor(s / 60))
-    const seconds = s => Math.ceil(s % 60)
+    const seconds = s => Math.max(0, Math.floor(s % 60))
 
     const addTimeLeft = n => {
         let set = Math.max(timeLeft + n, 0)
@@ -58,11 +58,15 @@ export const TimePanel = ({ user }) => {
         return () => clearInterval(int)
     }, [user, timeLeft, lastTick, running, timeToday, today])
 
+    if(running)
+        setStatus('focus (' + minutes(timeLeft) + ' m ' + seconds(timeLeft) + 's)')
+    else setStatus('focus')
+
     return <div className="time-panel">
-        {minutes(timeToday)} / {minutes(goalToday)} min
+        {minutes(timeToday)} / {minutes(goalToday)} m
         <br />
         <button onClick={() => addTimeLeft(-15 * 60)}>-</button>
-        {minutes(timeLeft)} min {seconds(timeLeft)} s
+        {minutes(timeLeft)} m {seconds(timeLeft)} s
         <button onClick={() => addTimeLeft(15 * 60)}>+</button>
         <button onClick={() => addTimeLeft(15)}>.</button>
         <button onClick={() => setRunning(!running)}>
