@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import moment from 'moment'
 
 export const TimePanel = ({ user, setStatus }) => {
@@ -11,12 +11,12 @@ export const TimePanel = ({ user, setStatus }) => {
     const today = moment().format('YYYY-MM-DD')
 
     useEffect(() => {
-        if(user.loggedIn) {
+        if (user.loggedIn) {
             const dbDay = user.readDay(today)
             setGoalToday(dbDay.goal * 60)
             setTimeToday(dbDay.done * 60)
         }
-    }, [user.loggedIn])
+    }, [user, today])
 
     const minutes = s => Math.max(0, Math.floor(s / 60))
     const seconds = s => Math.max(0, Math.floor(s % 60))
@@ -27,38 +27,38 @@ export const TimePanel = ({ user, setStatus }) => {
         setTimeLeft(set)
     }
 
-    const doTick = () => {
+    const doTick = useCallback(() => {
         const delta = (Date.now() - lastTick) / 1000
         setTimeLeft(timeLeft - delta)
         setLastTick(Date.now())
-        
+
         const dbDay = user.readDay(today)
         setGoalToday(dbDay.goal * 60)
         const dbSecondsDone = dbDay.done * 60
 
-        if(dbSecondsDone > timeToday)
+        if (dbSecondsDone > timeToday)
             setTimeToday(dbSecondsDone + delta)
         else
             setTimeToday(timeToday + delta)
 
         user.writeDay(today, minutes(timeToday))
-    }
+    }, [lastTick, timeLeft, user, today, timeToday])
 
     useEffect(() => {
         const int = setInterval(() => {
-            if(running) doTick()
+            if (running) doTick()
             else setLastTick(Date.now())
-            
-            if(timeLeft < 0) {
+
+            if (timeLeft < 0) {
                 setRunning(false)
                 setTimeLeft(0)
             }
         }, 500)
 
         return () => clearInterval(int)
-    }, [user, timeLeft, lastTick, running, timeToday, today])
+    }, [user, timeLeft, lastTick, running, timeToday, today, doTick])
 
-    if(running)
+    if (running)
         setStatus('focus (' + minutes(timeLeft) + ' m ' + seconds(timeLeft) + 's)')
     else setStatus('focus')
 

@@ -21,8 +21,33 @@ a {
     width: 40%;
 }
 
-.calendar-header a {
+.calendar-header a,
+.calendar-header button {
     width: 30%;
+}
+
+.link-button {
+    background: none;
+    border: none;
+    text-decoration: underline;
+    color: darkgrey;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+    font-size: inherit;
+    font-family: inherit;
+}
+
+.calendar-header button {
+    background: none;
+    border: none;
+    text-decoration: underline;
+    color: darkgrey;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+    font-size: inherit;
+    font-family: inherit;
 }
 
 .calendar-body {

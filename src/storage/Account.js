@@ -2,13 +2,15 @@ import { useEffect } from 'react'
 
 export const Account = ({ user, setUser }) => {
     useEffect(() => {
-        setTimeout(() => 
-            user.login(setUser)
-        , 500)
-    }, [])
+        if (!user.loggedIn) {
+            setTimeout(() =>
+                user.login(setUser)
+                , 500)
+        }
+    }, [user, setUser])
 
-    if(user.loggedIn)
-        return <a onClick={() => user.logout(setUser)}>log out</a>
+    if (user.loggedIn)
+        return <button className="link-button" onClick={() => user.logout(setUser)}>log out</button>
 
-    return <a onClick={() => user.authLogin(setUser)}>log in</a>
+    return <button className="link-button" onClick={() => user.authLogin(setUser)}>log in</button>
 }

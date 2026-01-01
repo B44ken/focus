@@ -3,7 +3,7 @@ import { Calendar } from './calendar/Calendar'
 import { Account } from './storage/Account'
 import { TimePanel } from './time/TimePanel'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { FirebaseUser } from './storage/user'
 
 import 'firebaseui/dist/firebaseui.css'
