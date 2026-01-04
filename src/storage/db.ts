@@ -30,7 +30,7 @@ export const getUser = async (setUser: (user: UserData) => void): Promise<UserDa
 
     const root = (...s: string[]) => ref(db, ['users', auth.currentUser?.uid, ...s].join('/'))
 
-    const date = (day = 'today' as Date | 'today', hoursOff = -7) =>
+    const date = (day = 'today' as Date | 'today', hoursOff = -10) =>
         day instanceof Date
             ? day.toISOString().slice(0, 10)
             : new Date(Date.now() + 36e5 * hoursOff).toISOString().slice(0, 10)
