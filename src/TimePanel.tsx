@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { UserData } from '../storage/db'
+import { UserData } from './storage/db'
 
 const formatMMSS = (s: number) => {
     const mm = Math.max(0, Math.floor(s / 60))
@@ -7,7 +7,7 @@ const formatMMSS = (s: number) => {
     return `${mm}:${ss}`
 }
 
-export const TimePanel = ({ user }: { user: UserData }) => {
+export const TimePanel = ({ user, pickedTask }: { user: UserData, pickedTask: string | null }) => {
     const [start, setStart] = useState<number>(0)
     const [now, setNow] = useState<number>(0)
 
@@ -16,20 +16,35 @@ export const TimePanel = ({ user }: { user: UserData }) => {
         return () => clearInterval(ci)
     }, [now])
 
-    const sum = start ? now - start : user.day('today').done
+    useEffect(() => {
+        const handler = (e: BeforeUnloadEvent) => {
+            if (start) {
+                e.preventDefault()
+                e.returnValue = ''
+            }
+        }
+        window.addEventListener('beforeunload', handler)
+        return () => window.removeEventListener('beforeunload', handler)
+    }, [start])
+
+    const sum = start ? now - start : user.stats.get('today').done
 
     const accumulate = () => {
-        user.day('today', sum)
+        user.stats.addTime('today', sum)
+        if (pickedTask)
+            user.tasks.addTime('today', pickedTask, sum)
         setStart(0)
     }
 
     return <>
         <div className="panel-header">
             <div>GOAL TODAY</div>
-            <div>{formatMMSS(user.day('today').goal)}</div>
+            <div>{formatMMSS(user.stats.get('today').goal)}</div>
         </div>
 
         <div className="timer-display"> {formatMMSS(sum)} </div>
+
+        {pickedTask && <div className="text-center font-bold text-gray-500 mb-4">{pickedTask}</div>}
 
         <div className="control-group">
             {!start ? (

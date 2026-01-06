@@ -19,14 +19,32 @@ if (!firebase.apps.length)
 
 const db = getDatabase(), auth = getAuth(), provider = new GoogleAuthProvider()
 
-export type UserData = {
-    logout: () => void
-    day: (when: Date | 'today', add?: number, goal?: number) => { done: number, goal: number }
-    task: (when: Date | 'today', body?: string, add?: number, goal?: number) => { body: string, done: number, goal: number }[] | undefined
+// Domain: Tasks
+export type Task = {
+    body: string;
+    done: number;
+    goal: number;
 }
+
+export type UserData = {
+    logout: () => void;
+    stats: {
+        get: (when: Date | 'today') => { done: number, goal: number };
+        addTime: (when: Date | 'today', seconds: number) => void;
+        setGoal: (when: Date | 'today', seconds: number) => void;
+    };
+    tasks: {
+        list: (when: Date | 'today') => Task[];
+        create: (when: Date | 'today', body: string, goal: number) => void;
+        addTime: (when: Date | 'today', body: string, seconds: number) => void;
+        delete: (when: Date | 'today', body: string) => void;
+    };
+}
+
 export const getUser = async (setUser: (user: UserData) => void): Promise<UserData> => {
     if (!auth.currentUser)
         await signInWithPopup(auth, provider)
+    console.log('getUser() as ' + auth.currentUser?.uid)
 
     const root = (...s: string[]) => ref(db, ['users', auth.currentUser?.uid, ...s].join('/'))
 
@@ -35,41 +53,51 @@ export const getUser = async (setUser: (user: UserData) => void): Promise<UserDa
             ? day.toISOString().slice(0, 10)
             : new Date(Date.now() + 36e5 * hoursOff).toISOString().slice(0, 10)
 
-    const days = (await get(root('days'))).val(), tasks = (await get(root('tasks'))).val()
+    const days = (await get(root('days'))).val() || {}, tasks = (await get(root('tasks'))).val() || {}
 
-    if (days == null) {
+    if (Object.keys(days).length === 0) {
         await set(root(), { days: { [date('today')]: { goal: 60 * 60, done: 0 } } })
         return getUser(setUser)
     }
 
-    const day = (when: Date | 'today', add = 0, goal = null as number | null): { done: number, goal: number } => {
-        const prev = days[date(when)]
-        const done = (prev?.done || 0) + add
-        const g = goal || prev?.goal || 60 * 60
-        if (add > 0) {
-            set(root('days', date(when)), { goal, done })
-                .then(async () => setUser(await getUser(setUser)))
-            console.log({ when, add, goal, done, g })
+    const refresh = async () => setUser(await getUser(setUser))
+
+    const stats = {
+        get: (when: Date | 'today') => {
+            const prev = days[date(when)]
+            return { done: prev?.done || 0, goal: prev?.goal || 3600 }
+        },
+        addTime: (when: Date | 'today', seconds: number) => {
+            const d = date(when)
+            const prev = days[d] || { done: 0, goal: 3600 }
+            set(root('days', d), { ...prev, done: prev.done + seconds }).then(refresh)
+        },
+        setGoal: (when: Date | 'today', seconds: number) => {
+            const d = date(when)
+            const prev = days[d] || { done: 0, goal: 3600 }
+            set(root('days', d), { ...prev, goal: seconds }).then(refresh)
         }
-        return { done, goal: g }
     }
 
-    const task = (when: Date | 'today', body?: string, add = 0, goal?: number): { body: string, done: number, goal: number }[] | undefined => {
-
-        const prev = tasks[date(when)] || {}
-        // tasks('today'): get todays task
-        if (body == null) return prev
-
-        const done = (prev?.done || 0) + add
-        const g = goal || prev?.goal || 60 * 60
-        const query = (goal == null) ?
-            // tasks('today', 'new task', null): delete task
-            remove(root('tasks', date(when), body)) :
-            // tasks('today', 'new task', 60): new task
-            set(root('tasks', date(when)), { goal, done, body })
-
-        query.then(async () => setUser(await getUser(setUser)))
+    const taskMethods = {
+        list: (when: Date | 'today') => {
+            const t = tasks[date(when)] || {}
+            return Object.entries(t).map(([body, val]: [string, any]) => ({ body, ...val }))
+        },
+        create: (when: Date | 'today', body: string, goal: number) => {
+            set(root('tasks', date(when), body), { goal, done: 0 }).then(refresh)
+        },
+        addTime: (when: Date | 'today', body: string, seconds: number) => {
+            const d = date(when)
+            const t = tasks[d]?.[body]
+            if (t) {
+                set(root('tasks', d, body), { ...t, done: t.done + seconds }).then(refresh)
+            }
+        },
+        delete: (when: Date | 'today', body: string) => {
+            remove(root('tasks', date(when), body)).then(refresh)
+        }
     }
 
-    return { day, task, logout: auth.signOut }
+    return { logout: auth.signOut, stats, tasks: taskMethods }
 }

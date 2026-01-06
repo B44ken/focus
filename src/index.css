@@ -20,7 +20,7 @@ h1 {
     }
 
     .timer-display {
-        @apply py-8 text-7xl font-mono font-bold text-gray-900;
+        @apply pt-6 pb-2 text-7xl font-mono font-bold text-gray-900;
     }
 
     .control-group {
@@ -44,7 +44,7 @@ h1 {
     }
 
     .calendar-day {
-        @apply aspect-square flex items-center justify-center rounded-full text-xs font-mono transition-colors;
+        @apply aspect-square flex items-center justify-center w-8 font-mono transition-colors;
     }
 
     .calendar-day.success {
